@@ -83,6 +83,9 @@ float getNormalizedPosition(){
     return analogRead(pin_poti)/1023.0;
 }
 
+void setStepCount(int steps){
+    this->allsteps=steps;
+}
 
 private:  
 int pin_poti;
