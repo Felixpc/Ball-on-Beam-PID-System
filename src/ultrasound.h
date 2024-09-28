@@ -18,7 +18,7 @@ class Ultrasound{
 
         unsigned long measure_pulselength(){
             digitalWrite(this->pin_trigger, LOW);
-            delay(5);
+            delayMicroseconds(10);
             digitalWrite(this->pin_trigger, HIGH);
             delayMicroseconds(10);
             digitalWrite(this->pin_trigger, LOW);

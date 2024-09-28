@@ -49,7 +49,7 @@ private:
     float old_error;
     float I_teil;
 
-    float I_limit=300;
+    float I_limit=50;
 
 
     static const int bufferlength=35;

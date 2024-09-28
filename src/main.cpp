@@ -1,17 +1,18 @@
 #include <Arduino.h>
 #include "ultrasound.h"
 #include <Servo.h>
-#include <Buzzer.h>
 #include "LowPass.h"
 #include "PID.h"
 #include "Settings.h"
 
 unsigned long timing=0;
 
+unsigned loop_interval_time=0;
+int loopcounter=0;
 
 float Pgain=15.0f;
 float Igain=0.08f;
-float Dgain=70.0f;
+float Dgain=45.0f;//45
 float setpoint=14.0;
 PID pid=PID();
 
@@ -21,9 +22,6 @@ Ultrasound sensor = Ultrasound(3,2);
 
 Settings settings = Settings();
 
-//Ultrasound sensor = Ultrasound(5,4);
-
-Buzzer buzzer(6);
 Servo servo;
 void setup() {
     Serial.begin(9600);
@@ -32,9 +30,9 @@ void setup() {
     settings.init();
 
     settings.addValue(valuesetting("P gain setting", Pgain, 50));
-    settings.addValue(valuesetting("I gain setting", Igain, 5));
+    settings.addValue(valuesetting("I gain setting", Igain, 0.50));
     settings.addValue(valuesetting("D gain setting", Dgain, 100));
-    settings.addValue(valuesetting("setpoint setting", setpoint, 40));
+    settings.addValue(valuesetting("setpoint setting", setpoint, 16));
 
 
    
@@ -48,7 +46,7 @@ float distance_old=0;
 void loop() {
     settings.update();
     if(timing < micros()){
-        timing = micros()+4000;
+        timing = micros()+8700;
 
         distance -= (distance-sensor.measure_distance())*0.15;
 
@@ -59,8 +57,10 @@ void loop() {
 
         if(distance > 40){
             distance = 40;
+            pid.out=-100;
+        }else{
+            pid.calculatePID(distance, setpoint, &Pgain, &Igain, &Dgain);
         }
-        pid.calculatePID(distance, setpoint, &Pgain, &Igain, &Dgain);
         //Serial.println(distance);
     
         float regelwert=pid.out;
@@ -73,6 +73,12 @@ void loop() {
         lowpass.update(midpoint+regelwert);
         servo.writeMicroseconds(lowpass.getOutput());
         distance_old=distance;
+
+        loopcounter++;
+        loop_interval_time = (micros()-(timing-8700));
+        if((loopcounter & 100) ==0){
+            //Serial.println(loop_interval_time);
+        }
     }
     
     

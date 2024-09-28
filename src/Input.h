@@ -24,8 +24,8 @@ void setup(){
 
 }
 void update(){
-    if(timing < millis()){
-        timing=millis()+4;
+    if(timing < micros()){
+        timing=micros()+1000;
 
 
         int pos=0;

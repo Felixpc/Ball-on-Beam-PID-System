@@ -2,17 +2,17 @@
 #include "Input.h"
 
 typedef struct valuesetting{
-    valuesetting(String name, float &value, float step){
+    valuesetting(String name, float &value, float max){
         this->name=name;
         this->value=&value;
-        this->step=step;
+        this->max=max;
     }
     valuesetting(){
 
     }
     String name;
     float *value;
-    float step=1;
+    float max=1;
 
 } valuesetting_t;
 
@@ -23,19 +23,15 @@ float currentmodifier=0;
 
 valuesetting_t set_names[10];
 
-typedef enum {
-    P_setting=0,
-    I_setting=1,
-    D_setting=2,
-    Setpoint_setting=3
-} modes_t;
+
         
-        modes_t current_mode=P_setting;
+int current_mode=0;
 
 
-        bool In_selectionmode=true;
+bool In_selectionmode=true;
 
-    int valuecount=0;
+int valuecount=0;
+
 class Settings{
     public:
     void init(){
@@ -47,7 +43,7 @@ class Settings{
         input.registerPotiCallback([](int pos){
             if(In_selectionmode){
                 current_mode=pos;
-                Serial.println("current mode: " + set_names[current_mode].name);
+                Serial.print("current mode: " + set_names[current_mode].name + "                \r");
             }
 
         });
@@ -78,7 +74,7 @@ class Settings{
             timing = millis()+100;
 
         if(!In_selectionmode){
-            currentmodifier=input.getNormalizedPosition()*set_names[current_mode].step;
+            currentmodifier=input.getNormalizedPosition()*set_names[current_mode].max;
             
             Serial.print("selection: ");
             Serial.print(currentmodifier);
