@@ -106,7 +106,7 @@ class Settings{
             if(set_names[current_mode].livesetting){
                 *set_names[current_mode].value-=(*set_names[current_mode].value-currentmodifier)*0.1f;
             }else{
-                if(changeCallback!=nullptr && timingcounter>15){
+                if(changeCallback!=nullptr && timingcounter>8){
                     changeCallback(current_mode);
                     timingcounter=0;
                 }

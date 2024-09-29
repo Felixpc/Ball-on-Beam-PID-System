@@ -21,6 +21,10 @@ public:
     }
     unsigned long timing;
     void show(int line=-1){
+        isworking=true;
+        if(beforeshowcallback!=nullptr){
+            beforeshowcallback();
+        }
         if(line>=4){//TODO scrolling
             //return;
         }
@@ -30,7 +34,6 @@ public:
             scrollposition=0;
         }
 
-        Serial.println("displayupdate");
         u8x8->setFont(u8x8_font_8x13_1x2_f);
         u8x8->setInverseFont(0);
         if(line==-1){
@@ -62,18 +65,18 @@ public:
                 u8x8->drawString(x, (i-scrollposition)*2, " ");
             }
         }
-
+        isworking=false;
     }
-    void select(int selection){
-        switch(selection){
-            case 0:
-                //u8x8->drawString(0, 0, ("P: " + String(p)).c_str());
-            break;
-        }
+    bool isWorking(){
+        return isworking;
     }
-
+    void setBeforeShowCallback(void ( *beforeshowcallback )()){
+        this->beforeshowcallback=beforeshowcallback;
+    }
 private:
 U8X8_SSD1306_128X64_NONAME_SW_I2C *u8x8;
 int scrollposition=0;
+bool isworking=false;
+void ( *beforeshowcallback )() = nullptr;
 
 };

@@ -51,9 +51,14 @@ void setup() {
         ui->show(line);
     };
 
+    ui->setBeforeShowCallback([](){
+        servo.writeMicroseconds(midpoint-50);
+        pid.reset();
+    });
+
     delay(3000);
     ui->show();
-
+    pid.reset();
 }
 
 
@@ -65,6 +70,14 @@ void loop() {
 
         distance -= (distance-sensor.measure_distance())*0.15;
 
+
+        if(ui->isWorking() || (!SETTINGS::In_selectionmode && !SETTINGS::set_names[SETTINGS::current_mode].livesetting)){
+            pid.reset();
+            servo.writeMicroseconds(midpoint-50);
+            return;
+        }
+
+
         if(abs(distance-distance_old)>4.0){
             //distance=distance_old;
             //Serial.println("new measurement droopped");
@@ -72,7 +85,10 @@ void loop() {
 
         if(distance > 40){
             distance = 40;
-            pid.out=-100;
+            pid.reset();
+            servo.writeMicroseconds(midpoint-50);
+            timing=micros()+2000000;
+            return;
         }else{
             pid.calculatePID(distance, setpoint, &Pgain, &Igain, &Dgain);
         }

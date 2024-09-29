@@ -24,7 +24,6 @@ public:
         float I=I_teil;
 
         
-        this->out=P+I+D;
 
 
         lastD[cpos]=error;
@@ -39,10 +38,19 @@ public:
         }
         this->old_error=sum/bufferlength;
 
+        this->out=P+I+D;
+
         return out;
     }
         float out;
 
+    void reset(){
+        this->I_teil=0;
+        this->old_error=0;
+        for(int i=0;i<bufferlength;i++){
+            lastD[i]=0;
+        }
+    }
 private:
 
 
