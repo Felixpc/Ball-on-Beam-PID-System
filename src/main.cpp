@@ -4,11 +4,19 @@
 #include "LowPass.h"
 #include "PID.h"
 #include "Settings.h"
+#include "UI.h"
 
 unsigned long timing=0;
 
 unsigned loop_interval_time=0;
 int loopcounter=0;
+
+float midpoint=1500;
+float Servo_limit=500;
+
+float distance=0;
+float distance_old=0;
+
 
 float Pgain=15.0f;
 float Igain=0.08f;
@@ -21,29 +29,34 @@ LowPassFilter lowpass=LowPassFilter(20, 0.04f);
 
 Ultrasound sensor = Ultrasound(3,2);
 
-Settings settings = Settings();
+SETTINGS::Settings settings = SETTINGS::Settings();
+UI *ui = new UI(A5, A4);
 
 Servo servo;
 void setup() {
     Serial.begin(9600);
 
     servo.attach(5);
+    servo.writeMicroseconds(midpoint-50);
+    ui->init();
+    settings.init(nullptr);
 
-    settings.init();
+    settings.addValue(SETTINGS::valuesetting("P gain setting", "P", Pgain, 50));
+    settings.addValue(SETTINGS::valuesetting("I gain setting", "I", Igain, 0.50));
+    settings.addValue(SETTINGS::valuesetting("D gain setting", "D", Dgain, 100));
+    settings.addValue(SETTINGS::valuesetting("setpoint setting", "SET", setpoint, 16));
+    settings.addValue(SETTINGS::valuesetting("live setpoint setting", "Live Setpoint", setpoint, 16, true));
 
-    settings.addValue(valuesetting("P gain setting", Pgain, 50));
-    settings.addValue(valuesetting("I gain setting", Igain, 0.50));
-    settings.addValue(valuesetting("D gain setting", Dgain, 100));
-    settings.addValue(valuesetting("setpoint setting", setpoint, 16));
-    settings.addValue(valuesetting("live setpoint setting", setpoint, 16, true));
+    SETTINGS::changeCallback=[](int line){
+        ui->show(line);
+    };
+
+    delay(3000);
+    ui->show();
 
 }
 
-float midpoint=1500;
-float Servo_limit=500;
 
-float distance=0;
-float distance_old=0;
 void loop() {
     settings.update();
     
