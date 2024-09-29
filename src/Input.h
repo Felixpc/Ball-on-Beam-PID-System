@@ -1,8 +1,4 @@
 #include "Arduino.h"
-#include <Wire.h>
-
-//#include <U8g2lib.h>
-
 
 
 class Input{
@@ -14,65 +10,56 @@ Input(int pin_poti, int pin_button){
 
     pinMode(this->pin_poti, INPUT);
     pinMode(this->pin_button, INPUT);
-
-
 }
 void setup(){
-    //u8g2.setI2CAddress(0x3C);
 
-   //u8g2.begin();
 
 }
 void update(){
     if(timing < micros()){
         timing=micros()+1000;
 
-
+        //dividing poti into multiple steps for selection
         int pos=0;
-        for(int i=0;i<allsteps;i++){
-            if((analogRead(pin_poti)/1023.0)>=(i*(1.0/allsteps)))
+        for(int i=0;i<stepCount;i++){
+            if((analogRead(pin_poti)/1023.0)>=(i*(1.0/stepCount)))
             {
                 pos=i;
             }
         }
         PotiPos=pos;
         if(PotiPos!=PotiPos_old){
-            if(poticallback!=nullptr){
-                poticallback(PotiPos);
+            if(potiStepCallback!=nullptr){
+                potiStepCallback(PotiPos);//call on change callback
             }
         }
         PotiPos_old=PotiPos;
-
+        //simple debouncing of push button
         if(digitalRead(pin_button)){
-            buttoncounter++;
+            debounceCounter++;
         }else{
-            buttoncounter--;
+            debounceCounter--;
         }
         
-
-        if(buttoncounter>=10){
-            buttoncounter=10;
+        if(debounceCounter>=10){
+            debounceCounter=10;
             button_state=false;
-            //Serial.println("button pressed");
         }
-        if(buttoncounter<=-10){
-            buttoncounter=-10;
+        if(debounceCounter<=-10){
+            debounceCounter=-10;
             button_state=true;
-            //Serial.println("button released");
         }
-        if((old_button_state!=button_state) && (button_state==true)){
+        if((old_button_state!=button_state) && (button_state==true)){//detect pushback and call callback
             if(buttoncallback!=nullptr){
                 buttoncallback();
             }
         }
         old_button_state=button_state;
-
     }
-
 }
 
-void registerPotiCallback(void (*callback)(int)){
-    this->poticallback=callback;
+void registerPotiStepCallback(void (*callback)(int)){
+    this->potiStepCallback=callback;
 }
 
 void registerButtonPushbackCallback(void (*callback)()){
@@ -84,18 +71,17 @@ float getNormalizedPosition(){
 }
 
 void setStepCount(int steps){
-    this->allsteps=steps;
+    this->stepCount=steps;
 }
 
-private:  
+private:
+//pins
 int pin_poti;
 int pin_button;
+
 unsigned long timing=0;
 
-void ( *poticallback )( int ) = nullptr;
-void ( *buttoncallback )() = nullptr;
-
-int allsteps=4;
+int stepCount=4;
 
 int PotiPos=0;
 int PotiPos_old=0;
@@ -103,6 +89,10 @@ int PotiPos_old=0;
 bool button_state=true;
 bool old_button_state=true;
 
-int buttoncounter=0;
+int debounceCounter=0;
+
+//callbacks
+void ( *potiStepCallback )( int ) = nullptr;
+void ( *buttoncallback )() = nullptr;
 
 };

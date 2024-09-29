@@ -1,7 +1,9 @@
 #pragma once
-
+//TODO this class and global variables is not perfect
 #include "Arduino.h"
 #include "Input.h"
+
+#define MAX_SETTINGS 5//TODO use dynamic approach
 
 namespace SETTINGS{
 
@@ -19,9 +21,8 @@ typedef struct valuesetting{
         this->livesetting=livesetting;
         this->shortdescriptor=shortdescriptor;
     }
-    valuesetting(){
+    valuesetting(){};
 
-    }
     String name;
     float *value;
     float max=1;
@@ -30,16 +31,13 @@ typedef struct valuesetting{
 
 } valuesetting_t;
 
-Input input = Input(A0, 4);
+valuesetting_t set_names[MAX_SETTINGS];
 
+Input input = Input(A0, 4);
 
 float currentmodifier=0;
 
-valuesetting_t set_names[5];
-
-
 int current_mode=0;
-
 
 bool In_selectionmode=true;
 
@@ -47,17 +45,15 @@ int valuecount=0;
 
 void ( *changeCallback )(int) = nullptr;
 
-
 class Settings{
     public:
-    void init(float *uiref){
-        //ui_g=uiref;
-        Serial.println("### Welcome from the PID settings wizard ###");
-        Serial.println("############   Please Select a value to manipulate");
+    void init(){
+        Serial.println("############   Ball on Beam PID System               #########");
+        Serial.println("############   Please Select a value to manipulate   #########");
 
         input.setup();
 
-        input.registerPotiCallback([](int pos){
+        input.registerPotiStepCallback([](int pos){
             if(In_selectionmode){
                 current_mode=pos;
                 Serial.print("current mode: " + set_names[current_mode].name + "                \r");

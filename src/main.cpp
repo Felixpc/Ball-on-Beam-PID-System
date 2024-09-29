@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "ultrasound.h"
+#include "Ultrasound.h"
 #include <Servo.h>
 #include "LowPass.h"
 #include "PID.h"
@@ -17,18 +17,16 @@ float Servo_limit=500;
 float distance=0;
 float distance_old=0;
 
-
+//controll gains preconfig
 float Pgain=15.0f;
 float Igain=0.08f;
 float Dgain=55.0f;//45
+
 float setpoint=14.0;
 
 PID pid=PID();
-
 LowPassFilter lowpass=LowPassFilter(20, 0.04f);
-
 Ultrasound sensor = Ultrasound(3,2);
-
 SETTINGS::Settings settings = SETTINGS::Settings();
 UI *ui = new UI(A5, A4);
 
@@ -39,7 +37,7 @@ void setup() {
     servo.attach(5);
     servo.writeMicroseconds(midpoint-50);
     ui->init();
-    settings.init(nullptr);
+    settings.init();
 
     settings.addValue(SETTINGS::valuesetting("P gain setting", "P", Pgain, 50));
     settings.addValue(SETTINGS::valuesetting("I gain setting", "I", Igain, 0.50));
@@ -61,7 +59,6 @@ void setup() {
     pid.reset();
 }
 
-
 void loop() {
     settings.update();
     
@@ -77,13 +74,7 @@ void loop() {
             return;
         }
 
-
-        if(abs(distance-distance_old)>4.0){
-            //distance=distance_old;
-            //Serial.println("new measurement droopped");
-        }
-
-        if(distance > 40){
+        if(distance > 40){ //recover from ball to close to sensor
             distance = 40;
             pid.reset();
             servo.writeMicroseconds(midpoint-50);
@@ -92,7 +83,6 @@ void loop() {
         }else{
             pid.calculatePID(distance, setpoint, &Pgain, &Igain, &Dgain);
         }
-        //Serial.println(distance);
     
         float regelwert=pid.out;
         if(regelwert > Servo_limit){
@@ -107,7 +97,7 @@ void loop() {
 
         loopcounter++;
         loop_interval_time = (micros()-(timing-8700));
-        if((loopcounter & 100) ==0){
+        if((loopcounter & 100) == 0){
             //Serial.println(loop_interval_time);
             loopcounter=0;
         }
