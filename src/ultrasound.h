@@ -23,7 +23,7 @@ class Ultrasound{
             delayMicroseconds(10);
             digitalWrite(this->pin_trigger, LOW);
 
-            return pulseIn(pin_echo, HIGH);
+            return pulseIn(pin_echo, HIGH, 5000);
         }
         float measure_distance(){
             return measure_pulselength()/29.0f/2.0f;

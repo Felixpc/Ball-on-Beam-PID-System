@@ -75,7 +75,7 @@ void registerPotiCallback(void (*callback)(int)){
     this->poticallback=callback;
 }
 
-void registerButtonPushbackCallback(void (*callback)(int)){
+void registerButtonPushbackCallback(void (*callback)()){
     this->buttoncallback=callback;
 }
 
