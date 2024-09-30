@@ -11,7 +11,7 @@ unsigned long timing=0;
 unsigned loop_interval_time=0;
 int loopcounter=0;
 
-float midpoint=1500;
+float midpoint=1330;//PWM pulse at level
 float Servo_limit=500;
 
 float distance=0;
@@ -24,6 +24,8 @@ float Dgain=55.0f;//45
 
 float setpoint=14.0;
 
+int offset=50;
+
 PID pid=PID();
 LowPassFilter lowpass=LowPassFilter(20, 0.04f);
 Ultrasound sensor = Ultrasound(3,2);
@@ -35,7 +37,7 @@ void setup() {
     Serial.begin(9600);
 
     servo.attach(5);
-    servo.writeMicroseconds(midpoint-50);
+    servo.writeMicroseconds(midpoint-offset);
     ui->init();
     settings.init();
 
@@ -50,7 +52,7 @@ void setup() {
     };
 
     ui->setBeforeShowCallback([](){
-        servo.writeMicroseconds(midpoint-50);
+        servo.writeMicroseconds(midpoint-offset);
         pid.reset();
     });
 
@@ -70,14 +72,14 @@ void loop() {
 
         if(ui->isWorking() || (!SETTINGS::In_selectionmode && !SETTINGS::set_names[SETTINGS::current_mode].livesetting)){
             pid.reset();
-            servo.writeMicroseconds(midpoint-50);
+            servo.writeMicroseconds(midpoint-offset);
             return;
         }
 
         if(distance > 40){ //recover from ball to close to sensor
             distance = 40;
             pid.reset();
-            servo.writeMicroseconds(midpoint-50);
+            servo.writeMicroseconds(midpoint-offset);
             timing=micros()+2000000;
             return;
         }else{
@@ -91,7 +93,7 @@ void loop() {
         if(regelwert < -Servo_limit){
             regelwert = -Servo_limit;
         }
-        lowpass.update(midpoint+regelwert);
+        lowpass.update(midpoint+regelwert);//lowpass filter is not mandatory at this place
         servo.writeMicroseconds(lowpass.getOutput());
         distance_old=distance;
 

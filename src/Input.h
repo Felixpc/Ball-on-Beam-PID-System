@@ -21,10 +21,20 @@ void update(){
 
         //dividing poti into multiple steps for selection
         int pos=0;
+        static float spacing=0;//prevents flickering at transitions
         for(int i=0;i<stepCount;i++){
-            if((analogRead(pin_poti)/1023.0)>=(i*(1.0/stepCount)))
+            if((analogRead(pin_poti)/1023.0)>=(i*(1.0/stepCount))-spacing)
             {
                 pos=i;
+            }else{
+                //has to be testet
+                if(pos>PotiPos)
+                    spacing=0.01;
+                if(pos<PotiPos)
+                    spacing=-0.01;
+                    break;
+
+            
             }
         }
         PotiPos=pos;

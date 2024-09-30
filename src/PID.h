@@ -36,7 +36,7 @@ public:
         if(cpos >= bufferlength){
             cpos=0;
         }
-        //calculate average of the last errors
+        //calculate average of the last errors (not very efficient)
         float sum=0;
         for(int i=0;i<bufferlength;i++){
             sum += errorStorage[i];
