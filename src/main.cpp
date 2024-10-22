@@ -1,7 +1,6 @@
 #include <Arduino.h>
-#include "Ultrasound.h"
+#include "ultrasound.h"
 #include <Servo.h>
-#include "LowPass.h"
 #include "PID.h"
 #include "Settings.h"
 #include "UI.h"
@@ -27,7 +26,6 @@ float setpoint=14.0;
 int offset=50;
 
 PID pid=PID();
-LowPassFilter lowpass=LowPassFilter(20, 0.04f);
 Ultrasound sensor = Ultrasound(3,2);
 SETTINGS::Settings settings = SETTINGS::Settings();
 UI *ui = new UI(A5, A4);
@@ -93,8 +91,7 @@ void loop() {
         if(regelwert < -Servo_limit){
             regelwert = -Servo_limit;
         }
-        lowpass.update(midpoint+regelwert);//lowpass filter is not mandatory at this place
-        servo.writeMicroseconds(lowpass.getOutput());
+        servo.writeMicroseconds(midpoint+regelwert);
         distance_old=distance;
 
         loopcounter++;
